@@ -4,6 +4,7 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded());
 
 const pokedex = [
   {
@@ -32,9 +33,33 @@ const pokedex = [
   },
 ];
 
+let pokemon = undefined;
+
 //Rotas
 app.get("/", (req, res) => {
-  res.render("index", { pokedex });
+  res.render("index", { pokedex, pokemon });
+});
+
+app.post("/create", (req, res) => {
+  const pokemon = req.body;
+  pokemon.id = pokedex.length + 1;
+  pokedex.push(pokemon);
+  res.redirect("/#cards");
+});
+
+app.get("/detalhes/:id", (req,res) => {
+  const id = +req.params.id;
+  pokemon = pokedex.find((pokemon) => pokemon.id === id);
+  res.redirect("/#cadastro");
+})
+
+app.post("/update/:id", (req, res) => {
+  const id = +req.params.id -1;
+  const newPokemon = req.body;
+  newPokemon.id = id + 1;
+  pokedex[id] = newPokemon;
+  pokemon = undefined;
+  res.redirect("/#cards");
 });
 
 app.listen(3000, () =>
